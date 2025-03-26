@@ -38,7 +38,7 @@ def transcribe(file_path):
 
 # Extract MFCC features for emotion classification
 def extract_features(audio_path):
-    data, sr = lb.load(audio_path, sr=None, mono=True, offset=1.0, duration=10)
+    data, sr = lb.load(audio_path, sr=16000, mono=True, duration=7)  # Load only 7 seconds
     mfcc = lb.feature.mfcc(y=data, sr=sr, n_mfcc=20, hop_length=256, n_mels=40)
     return np.mean(mfcc, axis=1)
 
@@ -72,28 +72,29 @@ def emotion(file_path):
     return emotion_map.get(emotion_pred, "Unknown")
 
 # Convert raw audio bytes to WAV
-def save_audio_bytes(audio_bytes, file_path, sample_width=2, channels=1, frame_rate=44100):
-    """Save raw audio bytes as a valid WAV file."""
+def save_audio_bytes(audio_bytes, file_path):
+    """Save raw audio bytes as a valid WAV file with 16kHz sample rate."""
     with wave.open(file_path, "wb") as wf:
-        wf.setnchannels(channels)  
-        wf.setsampwidth(sample_width)  
-        wf.setframerate(frame_rate)  
+        wf.setnchannels(1)  # Mono
+        wf.setsampwidth(2)  # 16-bit PCM
+        wf.setframerate(16000)  # 16,000 Hz
         wf.writeframes(audio_bytes)  
 
 # Streamlit UI
 def main():
-    st.title("🎙️ Live Speech Transcription & Emotion Recognition")
+    st.title("🎙️ Speech Transcription & Emotion Detection")
 
-    # Button to start recording
-    record_audio = st.button("🎤 Start Recording")
-
-    if record_audio:
-        audio_dict = mic_recorder(start_prompt="🎤 Recording...", stop_prompt="🛑 Stop Recording", key="recorder")
-    else:
-        audio_dict = None
+    # Single button to record audio for 7 seconds at 16,000 Hz
+    audio_dict = mic_recorder(
+        start_prompt="🎤 Click to Record (7s)", 
+        stop_prompt="🛑 Recording Stopped",
+        key="recorder",
+        sampling_rate=16000,  
+        time_limit=7  # Record only for 7 seconds
+    )
 
     if isinstance(audio_dict, dict) and "bytes" in audio_dict:
-        audio_bytes = audio_dict["bytes"]  # Extract raw audio bytes
+        audio_bytes = audio_dict["bytes"]
     else:
         audio_bytes = None
 
