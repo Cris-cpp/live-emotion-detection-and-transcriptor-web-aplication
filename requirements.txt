@@ -1,9 +1,9 @@
 joblib==1.4.2
-librosa==0.11.0
+librosa==0.10.1
 noisereduce==3.0.3
-numpy==2.2.4
-scipy==1.15.2
-sounddevice==0.5.1
+numpy==1.26.4
+scipy==1.11.4
+sounddevice==0.4.6
 streamlit==1.44.0
-torch==2.6.0
-transformers==4.50.1
+torch==2.5.1
+transformers==4.38.2
