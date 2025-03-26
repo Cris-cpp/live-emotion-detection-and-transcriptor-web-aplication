@@ -1,27 +1,35 @@
 import streamlit as st
 import numpy as np
-from scipy.io import wavfile as wav
-import noisereduce as nr
-import librosa as lb
-import joblib
-import os
 import torch
+import os
+import joblib
+import librosa as lb
 import soundfile as sf
+import noisereduce as nr
+from scipy.io import wavfile as wav
 from transformers import AutoProcessor, AutoModelForSpeechSeq2Seq
-from streamlit_mic_recorder import mic_recorder  # NEW IMPORT
+from streamlit_mic_recorder import mic_recorder  # Streamlit Mic Recorder
 
 # Load the emotion classification model
+@st.cache_resource
 def load_model():
     return joblib.load("random_forest.pkl")
 
-# Transcribe audio using Whisper
-def transcribe(file_path):
+# Load Whisper model for transcription
+@st.cache_resource
+def load_whisper():
     processor = AutoProcessor.from_pretrained("openai/whisper-small.en")
-    model = AutoModelForSpeechSeq2Seq.from_pretrained("openai/whisper-small.en")
+    model = AutoModelForSpeechSeq2Seq.from_pretrained(
+        "openai/whisper-small.en", torch_dtype=torch.float16, device_map="auto"
+    )
+    return processor, model
 
+# Transcribe speech using Whisper
+def transcribe(file_path):
+    processor, model = load_whisper()
     audio_input, sample_rate = lb.load(file_path, sr=16000)
     inputs = processor(audio_input, sampling_rate=sample_rate, return_tensors="pt")
-
+    
     with torch.no_grad():
         predicted_ids = model.generate(inputs["input_features"], max_length=448, num_beams=5)
     
@@ -63,19 +71,20 @@ def emotion(file_path):
     }
     return emotion_map.get(emotion_pred, "Unknown")
 
+# Streamlit UI
 def main():
-    st.title("🎙️ Emotion Recognition App")
+    st.title("🎙️ Live Speech Transcription & Emotion Recognition")
 
     # Record or upload audio
     audio_dict = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop Recording", key="recorder")
 
-    if audio_dict and "bytes" in audio_dict:
+    if isinstance(audio_dict, dict) and "bytes" in audio_dict:
         audio_bytes = audio_dict["bytes"]  # Extract raw audio bytes
     else:
         audio_bytes = None
 
     if audio_bytes:
-        st.write(f"📏 Audio length: {len(audio_bytes)} bytes")
+        st.write(f"📏 Audio size: {len(audio_bytes)} bytes")
 
         # Save recorded audio
         file_path = "recorded_audio.wav"
@@ -84,7 +93,7 @@ def main():
 
         # Ensure correct format
         try:
-            audio_data, sample_rate = sf.read(file_path)
+            audio_data, sample_rate = sf.read(file_path, always_2d=True)
             sf.write(file_path, audio_data, sample_rate, format="WAV")
         except Exception as e:
             st.error(f"⚠️ Audio processing error: {e}")
@@ -98,5 +107,3 @@ def main():
         predicted_emotion = emotion(file_path)
 
         # Display results
-        st.write(f"📝 Transcription: **{transcription}**")
-        st.write(f"😊 Predicted Emotion: **{predicted_emotion}**")
