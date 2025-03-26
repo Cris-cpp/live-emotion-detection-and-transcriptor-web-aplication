@@ -82,4 +82,38 @@ def save_audio_bytes(audio_bytes, file_path, sample_width=2, channels=1, frame_r
 
 # Streamlit UI
 def main():
-    st
+    st.title("🎙️ Live Speech Transcription & Emotion Recognition")
+
+    # Button to start recording
+    record_audio = st.button("🎤 Start Recording")
+
+    if record_audio:
+        audio_dict = mic_recorder(start_prompt="🎤 Recording...", stop_prompt="🛑 Stop Recording", key="recorder")
+    else:
+        audio_dict = None
+
+    if isinstance(audio_dict, dict) and "bytes" in audio_dict:
+        audio_bytes = audio_dict["bytes"]  # Extract raw audio bytes
+    else:
+        audio_bytes = None
+
+    if audio_bytes:
+        st.write(f"📏 Audio size: {len(audio_bytes)} bytes")
+
+        # Save properly formatted WAV file
+        file_path = "recorded_audio.wav"
+        save_audio_bytes(audio_bytes, file_path)
+
+        # Play recorded audio
+        st.audio(file_path, format="audio/wav")
+
+        # Process and predict
+        transcription = transcribe(file_path)
+        predicted_emotion = emotion(file_path)
+
+        # Display results
+        st.write(f"📝 **Transcription:** {transcription}")
+        st.write(f"😊 **Predicted Emotion:** {predicted_emotion}")
+
+if __name__ == "__main__":
+    main()
