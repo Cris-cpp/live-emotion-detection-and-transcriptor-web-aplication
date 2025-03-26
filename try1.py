@@ -63,15 +63,17 @@ def emotion(file_path):
     }
     return emotion_map.get(emotion_pred, "Unknown")
 
-# Streamlit App
 def main():
     st.title("🎙️ Emotion Recognition App")
 
     # Record or upload audio
-    audio_bytes = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop Recording", key="recorder")
+    audio_dict = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop Recording", key="recorder")
 
-    # Debugging: Check audio_bytes type
-    st.write(f"🔍 Audio type: {type(audio_bytes)}")
+    if audio_dict and "bytes" in audio_dict:
+        audio_bytes = audio_dict["bytes"]  # Extract raw audio bytes
+    else:
+        audio_bytes = None
+
     if audio_bytes:
         st.write(f"📏 Audio length: {len(audio_bytes)} bytes")
 
@@ -79,7 +81,7 @@ def main():
         file_path = "recorded_audio.wav"
         with open(file_path, "wb") as f:
             f.write(audio_bytes)
-        
+
         # Ensure correct format
         try:
             audio_data, sample_rate = sf.read(file_path)
@@ -98,7 +100,3 @@ def main():
         # Display results
         st.write(f"📝 Transcription: **{transcription}**")
         st.write(f"😊 Predicted Emotion: **{predicted_emotion}**")
-
-# Run the app
-if __name__ == "__main__":
-    main()
