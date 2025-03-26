@@ -10,10 +10,10 @@ from scipy.io import wavfile as wav
 from transformers import AutoProcessor, AutoModelForSpeechSeq2Seq
 
 try:
-    from streamlit_mic_recorder import mic_recorder  # External dependency
+    from streamlit_mic_recorder import mic_recorder  
     MIC_AVAILABLE = True
 except ImportError:
-    MIC_AVAILABLE = False  # Handle case where mic_recorder is not installed
+    MIC_AVAILABLE = False  
 
 # Load models
 @st.cache_resource
@@ -88,7 +88,6 @@ def main():
         start_prompt="🎤 Click to Record (7s)", 
         stop_prompt="🛑 Recording Stopped",
         key="recorder",
-        sampling_rate=16000,  
         time_limit=7  
     )
 
