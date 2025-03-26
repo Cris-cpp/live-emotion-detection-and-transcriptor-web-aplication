@@ -1,9 +1,0 @@
-streamlit
-scipy
-numpy
-noisereduce
-librosa
-joblib
-sounddevice
-torch
-transformers
