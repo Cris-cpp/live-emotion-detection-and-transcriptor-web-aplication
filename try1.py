@@ -1,28 +1,17 @@
 import streamlit as st
-import pickle
 import numpy as np
 from scipy.io import wavfile as wav
 import noisereduce as nr
 import librosa as lb
 import joblib
 import os
-import sounddevice as sd
 import torch
-from scipy.io.wavfile import write
+import soundfile as sf
 from transformers import AutoProcessor, AutoModelForSpeechSeq2Seq
+from streamlit_mic_recorder import mic_recorder  # NEW IMPORT
 
 def load_model():
     return joblib.load("random_forest.pkl")
-
-def listen():
-    samplerate = 16000
-    duration = 7
-    st.write("Recording...")
-    audio_data = sd.rec(int(samplerate * duration), samplerate=samplerate, channels=1, dtype=np.int16)
-    sd.wait()
-    st.write("Recording finished.")
-    write("recorded_audio.wav", samplerate, audio_data)
-    return "recorded_audio.wav"
 
 def transcribe(file_path):
     processor = AutoProcessor.from_pretrained("openai/whisper-small.en")
@@ -54,10 +43,22 @@ def emotion(file_path):
 
 def main():
     st.title("Emotion Recognition App")
-    if st.button("Record and Predict Emotion"):
-        file_path = listen()
+    
+    # Record audio using streamlit_mic_recorder
+    audio_bytes = mic_recorder(start_prompt="Start Recording", stop_prompt="Stop Recording", key="recorder")
+    
+    if audio_bytes:
+        st.audio(audio_bytes, format="audio/wav")
+        
+        # Save the recorded audio
+        file_path = "recorded_audio.wav"
+        with open(file_path, "wb") as f:
+            f.write(audio_bytes)
+        
+        # Process and predict
         transcription = transcribe(file_path)
         predicted_emotion = emotion(file_path)
+        
         st.write(f"Transcription: **{transcription}**")
         st.write(f"Predicted Emotion: **{predicted_emotion}**")
 
