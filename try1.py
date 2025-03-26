@@ -1,7 +1,7 @@
 import streamlit as st
 import numpy as np
 import torch
-import io
+import wave
 import joblib
 import librosa as lb
 import soundfile as sf
@@ -71,42 +71,15 @@ def emotion(file_path):
     }
     return emotion_map.get(emotion_pred, "Unknown")
 
+# Convert raw audio bytes to WAV
+def save_audio_bytes(audio_bytes, file_path, sample_width=2, channels=1, frame_rate=44100):
+    """Save raw audio bytes as a valid WAV file."""
+    with wave.open(file_path, "wb") as wf:
+        wf.setnchannels(channels)  
+        wf.setsampwidth(sample_width)  
+        wf.setframerate(frame_rate)  
+        wf.writeframes(audio_bytes)  
+
 # Streamlit UI
 def main():
-    st.title("🎙️ Live Speech Transcription & Emotion Recognition")
-
-    # Button to start recording
-    audio_dict = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop Recording", key="recorder")
-
-    if isinstance(audio_dict, dict) and "bytes" in audio_dict:
-        audio_bytes = audio_dict["bytes"]  # Extract raw audio bytes
-    else:
-        audio_bytes = None
-
-    if audio_bytes:
-        st.write(f"📏 Audio size: {len(audio_bytes)} bytes")
-
-        # Convert raw bytes to a proper WAV file
-        file_path = "recorded_audio.wav"
-        audio_buffer = io.BytesIO(audio_bytes)
-        
-        try:
-            audio_data, sample_rate = sf.read(audio_buffer, always_2d=True)
-            sf.write(file_path, audio_data, sample_rate, format="WAV")
-        except Exception as e:
-            st.error(f"⚠️ Audio processing error: {e}")
-            return
-        
-        # Play recorded audio
-        st.audio(file_path, format="audio/wav")
-
-        # Process and predict
-        transcription = transcribe(file_path)
-        predicted_emotion = emotion(file_path)
-
-        # Display results
-        st.write(f"📝 **Transcription:** {transcription}")
-        st.write(f"😊 **Predicted Emotion:** {predicted_emotion}")
-
-if __name__ == "__main__":
-    main()
+    st
