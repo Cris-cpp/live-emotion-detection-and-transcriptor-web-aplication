@@ -8,3 +8,4 @@ torch==2.5.1
 transformers==4.38.2
 soundfile==0.12.1
 streamlit-mic-recorder==0.0.8
+pillow==9.4.0
