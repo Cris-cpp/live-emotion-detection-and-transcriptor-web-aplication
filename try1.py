@@ -1,6 +1,7 @@
 import streamlit as st
 import numpy as np
 import torch
+import io
 import joblib
 import librosa as lb
 import soundfile as sf
@@ -74,7 +75,7 @@ def emotion(file_path):
 def main():
     st.title("🎙️ Live Speech Transcription & Emotion Recognition")
 
-    # Mic Recorder
+    # Button to start recording
     audio_dict = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop Recording", key="recorder")
 
     if isinstance(audio_dict, dict) and "bytes" in audio_dict:
@@ -85,14 +86,12 @@ def main():
     if audio_bytes:
         st.write(f"📏 Audio size: {len(audio_bytes)} bytes")
 
-        # Save recorded audio
+        # Convert raw bytes to a proper WAV file
         file_path = "recorded_audio.wav"
-        with open(file_path, "wb") as f:
-            f.write(audio_bytes)
-
-        # Ensure correct format
+        audio_buffer = io.BytesIO(audio_bytes)
+        
         try:
-            audio_data, sample_rate = sf.read(file_path, always_2d=True)
+            audio_data, sample_rate = sf.read(audio_buffer, always_2d=True)
             sf.write(file_path, audio_data, sample_rate, format="WAV")
         except Exception as e:
             st.error(f"⚠️ Audio processing error: {e}")
@@ -109,6 +108,5 @@ def main():
         st.write(f"📝 **Transcription:** {transcription}")
         st.write(f"😊 **Predicted Emotion:** {predicted_emotion}")
 
-# Run Streamlit app
 if __name__ == "__main__":
     main()
