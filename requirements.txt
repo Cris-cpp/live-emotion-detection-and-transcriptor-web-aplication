@@ -26,6 +26,7 @@ fonttools==4.56.0
 fqdn==1.5.1
 fsspec==2024.6.1
 gitdb==4.0.12
+numpy==2.2.4
 GitPython==3.1.44
 h11==0.14.0
 httpcore==1.0.7
