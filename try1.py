@@ -75,8 +75,11 @@ def emotion(file_path):
 def main():
     st.title("🎙️ Live Speech Transcription & Emotion Recognition")
 
-    # Record or upload audio
-    audio_dict = mic_recorder(start_prompt="🎤 Start Recording", stop_prompt="🛑 Stop Recording", key="recorder")
+    # Button to start recording
+    if st.button("🎤 Start Recording"):
+        audio_dict = mic_recorder(start_prompt="🎤 Recording...", stop_prompt="🛑 Stop", key="recorder")
+    else:
+        audio_dict = None
 
     if isinstance(audio_dict, dict) and "bytes" in audio_dict:
         audio_bytes = audio_dict["bytes"]  # Extract raw audio bytes
@@ -107,3 +110,4 @@ def main():
         predicted_emotion = emotion(file_path)
 
         # Display results
+        st.write(f"📝 **Transcription**
