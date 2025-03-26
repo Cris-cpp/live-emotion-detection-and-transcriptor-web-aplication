@@ -110,4 +110,4 @@ def main():
         predicted_emotion = emotion(file_path)
 
         # Display results
-        st.write(f"📝 **Transcription**
+        st.write(f"📝 **Transcription**)
