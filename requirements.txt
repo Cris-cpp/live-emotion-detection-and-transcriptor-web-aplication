@@ -1,3 +1,5 @@
+python>=3.11,<3.12
+
 joblib==1.4.2
 librosa==0.10.1
 noisereduce==3.0.3
@@ -7,4 +9,4 @@ streamlit==1.44.0
 torch==2.5.1
 transformers==4.38.2
 soundfile==0.12.1
-streamlit-mic-recorder==0.2.0  
+streamlit-mic-recorder==0.2.0
